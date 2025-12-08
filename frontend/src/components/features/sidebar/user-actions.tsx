@@ -14,6 +14,7 @@ interface UserActionsProps {
 export function UserActions({ onLogout, user, isLoading }: UserActionsProps) {
   const [accountContextMenuIsVisible, setAccountContextMenuIsVisible] =
     React.useState(false);
+  const closeTimeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   const { data: config } = useConfig();
 
@@ -26,8 +27,15 @@ export function UserActions({ onLogout, user, isLoading }: UserActionsProps) {
   };
 
   const closeAccountMenu = () => {
-    if (accountContextMenuIsVisible) {
+    closeTimeoutRef.current = setTimeout(() => {
       setAccountContextMenuIsVisible(false);
+    }, 350);
+  };
+
+  const cancelClose = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = undefined;
     }
   };
 
@@ -45,7 +53,12 @@ export function UserActions({ onLogout, user, isLoading }: UserActionsProps) {
   return (
     <div
       data-testid="user-actions"
-      className="w-8 h-8 relative cursor-pointer group"
+      className="w-8 h-8 relative cursor-pointer"
+      onMouseEnter={() => {
+        cancelClose();
+        setAccountContextMenuIsVisible(true);
+      }}
+      onMouseLeave={closeAccountMenu}
     >
       <UserAvatar
         avatarUrl={user?.avatar_url}
@@ -56,9 +69,14 @@ export function UserActions({ onLogout, user, isLoading }: UserActionsProps) {
       {(shouldShowUserActions || isOSS) && (
         <div
           className={cn(
-            "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto",
+            "opacity-0 pointer-events-none transition-opacity duration-200",
             showMenu && "opacity-100 pointer-events-auto",
           )}
+          onMouseEnter={() => {
+            cancelClose();
+            setAccountContextMenuIsVisible(true);
+          }}
+          onMouseLeave={closeAccountMenu}
         >
           <AccountSettingsContextMenu
             onLogout={handleLogout}
