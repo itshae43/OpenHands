@@ -29,7 +29,7 @@ export function UserActions({ onLogout, user, isLoading }: UserActionsProps) {
   const closeAccountMenu = () => {
     closeTimeoutRef.current = setTimeout(() => {
       setAccountContextMenuIsVisible(false);
-    }, 350);
+    }, 400);
   };
 
   const cancelClose = () => {
